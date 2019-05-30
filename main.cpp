@@ -11,8 +11,9 @@
  * Created on 21 de mayo de 2019, 18:13
  */
 
-#include <cstdlib>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct Result
 {
@@ -33,18 +34,36 @@ int string_length(const char* p_string)
     return size;
 }
 
-void problem_division(char* p_string, int p_subsize, char* p_sub_problems)
+void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems)
 {
     int length = string_length(p_string);
-    
-    if(length % p_subsize == 0)
+    int i, j;
+    char string_aux[p_subsize];
+
+    if (length % p_subsize == 0)
     {
-        int tam = length/p_subsize;
-        free(p_sub_problems);
-        //p_sub_problems = malloc(p_subsize*sizeof(char*));
-        for(int i = 0; i < length; i++)
+        int tam = length / p_subsize;
+        p_sub_problems = (char**) malloc(tam * sizeof (char*) + 1);
+
+        for (i = 0; i < tam; i++)
         {
+            for (j = 0; j < p_subsize; j++)
+            {
+                if (*(p_string + i * p_subsize + j) == '\0')
+                {
+                    break;
+                }
+                else
+                {
+                    string_aux[j] = *(p_string + i * p_subsize + j);
+                }
+            }
+
+            string_aux[j] = '\0';
+            p_sub_problems[i] = (char*) malloc(j * sizeof (char));
+            strcpy(p_sub_problems[i], string_aux);
         }
+        p_sub_problems[i] = NULL;
     }
 }
 
@@ -54,7 +73,7 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
     int index = 1;
     int count = 1;
     int length = string_length(p_problem);
-    
+
     while (index < length)
     {
         if (*(p_problem + index - 1) == *(p_problem + index))
@@ -81,31 +100,28 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
 
 Result DC_recursive(const char* p_problem, const int p_subsize)
 {
-    Result result;
-    result.index = 1;
-    char* sub_problems;
-    sub_problems = malloc(p_subsize * sizeof(char*));
-    int length = string_length(p_problem);
-
-    if (p_subsize == 0)
+    if (string_length(p_problem) <= p_subsize)
     {
-        return result;
+        return DC_iterative(p_problem, p_subsize);
     }
     else
     {
-        if (*(p_problem) == *(p_problem + 1))
+        Result final_result;
+        int i = 0;
+        char** sub_problems;
+        
+        problem_division(p_problem, p_subsize, sub_problems);
+
+        while (*(sub_problems + i) != NULL)
         {
-            Result aux = DC_recursive(p_problem + 1, p_subsize - 1);
-            result.index += aux.index;
-            result.repetitions += aux.repetitions;
-            return result;
+            Result result = DC_recursive(*(sub_problems + i), p_subsize);
+            
+            //Añadir cada resultado parcial a un vector de resultados;
         }
-        else
-        {
-            result.index = 0;
-            result.repetitions = 0;
-            return result;
-        }
+
+        //Fusionar todos los resultados paraciales en uno solo;
+
+        return final_result;
     }
 }
 
