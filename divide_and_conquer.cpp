@@ -85,32 +85,40 @@ Result final_result(const int p_subsize, const int num_solutions, char** sub_pro
     Result solution;
 
     for (int i = 0; i < num_solutions; i++)
-    {
+    {        
+        int anterior_index = 0;
         if (solution.repetitions <= (partial_solutions + i)->repetitions)
-        {            
+        {
             int j = 0;
             solution = *(partial_solutions + i);
-            
-            if(*(*(sub_problems + i) + solution.index + solution.repetitions) == '\0')
+
+            if (*(*(sub_problems + i) + solution.index + solution.repetitions) == '\0')
             {
-                while(*(*(sub_problems + i + 1) + j) == solution.character)
+                if ((i + 1) < num_solutions && j < p_subsize)
                 {
-                    solution.repetitions++;
-                    j++;
+                    while (*(*(sub_problems + i + 1) + j) == solution.character)
+                    {
+                        solution.repetitions++;
+                        j++;
+                    }
                 }
             }
-            
-            j = p_subsize;
-            if(solution.index == 0)
+
+            j = p_subsize - 1;
+            if (solution.index == 0)
             {
-                while(*(*(sub_problems + i - 1) + j) == solution.character)
+                if ((i - 1) > -1 && j > -1)
                 {
-                    solution.repetitions++;
-                    j--;
+                    while (*(*(sub_problems + i - 1) + j) == solution.character)
+                    {
+                        solution.repetitions++;
+                        anterior_index++;
+                        j--;
+                    }
                 }
             }
-            
-            solution.index = solution.index + i*p_subsize;            
+
+            solution.index = solution.index + i*p_subsize - anterior_index;
         }
     }
 
@@ -137,15 +145,15 @@ Result DC_recursive(const char* p_problem, const int p_subsize)
             Result solution = DC_recursive(*(sub_problems + i), p_subsize);
             partial_solutions[i] = solution;
         }
-        
+
         Result result = final_result(p_subsize, num_solutions, sub_problems, partial_solutions);
-        
+
         for (int i = 0; i < num_solutions; i++)
         {
             free(*(sub_problems + i));
         }
         free(sub_problems);
-        
+
         return result;
     }
 }
