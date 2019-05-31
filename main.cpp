@@ -34,37 +34,35 @@ int string_length(const char* p_string)
     return size;
 }
 
-void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems)
+void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems, int* num_solutions)
 {
     int length = string_length(p_string);
     int i, j;
-    char string_aux[p_subsize];
+    char string_aux[p_subsize + 1];
 
-    if (length % p_subsize == 0)
+    int tam = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
+    *num_solutions = tam;
+    p_sub_problems = (char**) realloc(p_sub_problems, tam * sizeof (char*));
+
+    for (i = 0; i < tam; i++)
     {
-        int tam = length / p_subsize;
-        p_sub_problems = (char**) malloc(tam * sizeof (char*) + 1);
-
-        for (i = 0; i < tam; i++)
+        for (j = 0; j < p_subsize; j++)
         {
-            for (j = 0; j < p_subsize; j++)
+            if (*(p_string + i * p_subsize + j) == '\0')
             {
-                if (*(p_string + i * p_subsize + j) == '\0')
-                {
-                    break;
-                }
-                else
-                {
-                    string_aux[j] = *(p_string + i * p_subsize + j);
-                }
+                break;
             }
-
-            string_aux[j] = '\0';
-            p_sub_problems[i] = (char*) malloc(j * sizeof (char));
-            strcpy(p_sub_problems[i], string_aux);
+            else
+            {
+                string_aux[j] = *(p_string + i * p_subsize + j);
+            }
         }
-        p_sub_problems[i] = NULL;
+
+        string_aux[j] = '\0';
+        *(p_sub_problems + i) = (char*) realloc(*(p_sub_problems + i), (p_subsize + 1) * sizeof (char));
+        strcpy(*(p_sub_problems + i), string_aux);
     }
+
 }
 
 Result DC_iterative(const char* p_problem, const int p_subsize)
@@ -84,6 +82,7 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
             {
                 result.repetitions = count;
                 result.index = index - count + 1;
+                result.character = *(p_problem + result.index);
             }
 
             index++;
@@ -98,6 +97,22 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
     return result;
 }
 
+Result final_result(const int p_subsize, const int num_solutions, Result* partial_solutions)
+{
+    Result solution;
+
+    for (int i = 0; i < num_solutions; i++)
+    {
+        if (solution.repetitions < (partial_solutions + i)->repetitions)
+        {
+            solution = *(partial_solutions + i);
+            solution.index = solution.index + i*p_subsize;
+        }
+    }
+
+    return solution;
+}
+
 Result DC_recursive(const char* p_problem, const int p_subsize)
 {
     if (string_length(p_problem) <= p_subsize)
@@ -106,22 +121,22 @@ Result DC_recursive(const char* p_problem, const int p_subsize)
     }
     else
     {
-        Result final_result;
-        int i = 0;
-        char** sub_problems;
-        
-        problem_division(p_problem, p_subsize, sub_problems);
+        int num_solutions;
+        char** sub_problems = (char**) malloc(sizeof (char*));
+        *sub_problems = NULL;
 
-        while (*(sub_problems + i) != NULL)
+        problem_division(p_problem, p_subsize, sub_problems, &num_solutions);
+        Result partial_solutions[num_solutions];
+
+        for (int i = 0; i < num_solutions; i++)
         {
-            Result result = DC_recursive(*(sub_problems + i), p_subsize);
-            
-            //Añadir cada resultado parcial a un vector de resultados;
+            Result solution = DC_recursive(*(sub_problems + i), p_subsize);
+            partial_solutions[i] = solution;
+            free(*(sub_problems + i));
         }
 
-        //Fusionar todos los resultados paraciales en uno solo;
-
-        return final_result;
+        free(sub_problems);
+        return final_result(p_subsize, num_solutions, partial_solutions);
     }
 }
 
@@ -131,7 +146,7 @@ int main(int argc, char** argv)
     int m = 5;
 
     Result result = DC_recursive(C, m);
-    printf("Indice: %d, Repeticiones: %d", result.index, result.repetitions);
+    printf("Indice: %d, Repeticiones: %d, Caracter: %c\n", result.index, result.repetitions, result.character);
 
     return 0;
 }
