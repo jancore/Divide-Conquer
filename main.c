@@ -14,19 +14,20 @@
 
 int main(int argc, char** argv)
 {
+    char opcion;
     int m = 5;
-    char C[] = "abceeeeksrzzzyx";
+    char C[] = "abceeeeksrzzzzyx";
     
     if (argc > 2)
     {
-        strcpy(C, argv[1]);
+        copy_string(C, argv[1]);
         m = atoi(argv[2]);
     }
 
     printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
     Result result = DC_recursive(C, m);
     printf("Indice: %d, Repeticiones: %d, Caracter: \"%c\"\n", result.index, result.repetitions, result.character);
-
+    
     return 0;
 }
 

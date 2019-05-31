@@ -5,6 +5,8 @@
  */
 #include "divide_and_conquer.h"
 
+Result Result_default = {-1, 1};
+
 int string_length(const char* p_string)
 {
     int size = 0;
@@ -17,6 +19,17 @@ int string_length(const char* p_string)
     return size;
 }
 
+void copy_string(char* string_out, char* string_in)
+{
+    int i = 0;
+    while(*(string_in + i) != '\0')
+    {
+        *(string_out + i) = *(string_in + i);
+        i++;
+    }
+    *(string_out + i) = '\0';
+}
+
 void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems, int* num_solutions)
 {
     int length = string_length(p_string);
@@ -26,7 +39,7 @@ void problem_division(const char* p_string, const int p_subsize, char** p_sub_pr
     int tam = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
     *num_solutions = tam;
     p_sub_problems = (char**) realloc(p_sub_problems, tam * sizeof (char*));
-
+    
     for (i = 0; i < tam; i++)
     {
         for (j = 0; j < p_subsize; j++)
@@ -40,17 +53,15 @@ void problem_division(const char* p_string, const int p_subsize, char** p_sub_pr
                 string_aux[j] = *(p_string + i * p_subsize + j);
             }
         }
-
         string_aux[j] = '\0';
-        *(p_sub_problems + i) = (char*) realloc(*(p_sub_problems + i), (j + 1) * sizeof (char));
-        strcpy(*(p_sub_problems + i), string_aux);
+        *(p_sub_problems + i) = (char*) malloc( (j + 1) * sizeof(char));
+        copy_string(*(p_sub_problems + i), string_aux);
     }
-
 }
 
 Result DC_iterative(const char* p_problem, const int p_subsize)
 {
-    Result result;
+    Result result = Result_default;
     int index = 1;
     int count = 1;
     int length = string_length(p_problem);
@@ -61,7 +72,7 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
         {
             count++;
 
-            if (count > result.repetitions && count <= p_subsize)
+            if (count >= result.repetitions && count <= p_subsize)
             {
                 result.repetitions = count;
                 result.index = index - count + 1;
@@ -82,7 +93,9 @@ Result DC_iterative(const char* p_problem, const int p_subsize)
 
 Result final_result(const int p_subsize, const int num_solutions, char** sub_problems, Result* partial_solutions)
 {
-    Result solution;
+    Result solution = Result_default;
+    Result final_solution;
+    final_solution.index = p_subsize*num_solutions;
 
     for (int i = 0; i < num_solutions; i++)
     {        
@@ -120,9 +133,12 @@ Result final_result(const int p_subsize, const int num_solutions, char** sub_pro
 
             solution.index = solution.index + i*p_subsize - anterior_index;
         }
+
+        if(solution.index < final_solution.index)
+            final_solution = solution;
     }
 
-    return solution;
+    return final_solution;
 }
 
 Result DC_recursive(const char* p_problem, const int p_subsize)
@@ -135,17 +151,17 @@ Result DC_recursive(const char* p_problem, const int p_subsize)
     {
         int num_solutions;
         char** sub_problems = (char**) malloc(sizeof (char*));
-        *sub_problems = NULL;
+        *sub_problems = (char *) NULL;
 
         problem_division(p_problem, p_subsize, sub_problems, &num_solutions);
+        
         Result partial_solutions[num_solutions];
-
+        
         for (int i = 0; i < num_solutions; i++)
         {
             Result solution = DC_recursive(*(sub_problems + i), p_subsize);
             partial_solutions[i] = solution;
         }
-
         Result result = final_result(p_subsize, num_solutions, sub_problems, partial_solutions);
 
         for (int i = 0; i < num_solutions; i++)

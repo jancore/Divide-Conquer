@@ -16,16 +16,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-struct Result
+struct Result_s
 {
-    int index = -1;
-    int repetitions = 1;
+    int index;
+    int repetitions;
     char character;
 };
 
+typedef struct Result_s Result;
+
 int string_length(const char* p_string);
+
+void copy_string(char* string_out, char* string_in);
 
 void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems, int* num_solutions);
 
