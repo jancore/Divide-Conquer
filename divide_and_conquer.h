@@ -19,22 +19,17 @@
 
 struct Result_s
 {
-    int index;
-    int repetitions;
-    char character;
+    int index_init;
+    int index_fin;
 };
 
 typedef struct Result_s Result;
 
 int string_length(const char* p_string);
 
-void copy_string(char* string_out, char* string_in);
+Result DC_iterative(const char* p_problem, const int p_limit);
 
-void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems, int* num_solutions);
-
-Result DC_iterative(const char* p_problem, const int p_subsize);
-
-Result final_result(const int p_subsize, const int num_solutions, char** sub_problems, Result* partial_solutions);
+Result final_result(const char* p_problem, const Result* p_solutions, const int p_num_solutions, int p_offset);
 
 Result DC_recursive(const char* p_problem, const int p_subsize);
 

@@ -1,144 +1,84 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 #include "divide_and_conquer.h"
-
-Result Result_default = {0, 1};
 
 int string_length(const char* p_string) {
     int size = 0;
 
-    while (*(p_string + size) != '\0') {
+    while (*(p_string + size) != '\0')
+    {
         ++size;
     }
 
     return size;
 }
 
-void copy_string(char* string_out, char* string_in) {
-    int i = 0;
-    while (*(string_in + i) != '\0') {
-        *(string_out + i) = *(string_in + i);
-        i++;
-    }
-    *(string_out + i) = '\0';
-}
-
-void problem_division(const char* p_string, const int p_subsize, char** p_sub_problems, int* num_solutions) {
-    int length = string_length(p_string);
-    int i, j;
-    char string_aux[p_subsize + 1];
-
-    int tam = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
-    *num_solutions = tam;
-    p_sub_problems = (char**) realloc(p_sub_problems, tam * sizeof (char*));
-
-    for (i = 0; i < tam; i++) {
-        for (j = 0; j < p_subsize; j++) {
-            if (*(p_string + i * p_subsize + j) == '\0') {
-                break;
-            } else {
-                string_aux[j] = *(p_string + i * p_subsize + j);
-            }
-        }
-        string_aux[j] = '\0';
-        *(p_sub_problems + i) = (char*) malloc((j + 1) * sizeof (char));
-        copy_string(*(p_sub_problems + i), string_aux);
-    }
-}
-
-Result DC_iterative(const char* p_problem, const int p_subsize) {
-    Result result = Result_default;
-    result.character = *p_problem;
+Result DC_iterative(const char* p_problem, const int p_limit) {
+    Result result = {0, 0};
     int index = 1;
     int count = 1;
-    int length = string_length(p_problem);
 
-    while (index < length) {
-        if (*(p_problem + index - 1) == *(p_problem + index)) {
+    while (index < p_limit)
+    {
+        if (*(p_problem + index - 1) == *(p_problem + index))
+        {
             count++;
-
-            if (count >= result.repetitions && count <= p_subsize) {
-                result.repetitions = count;
-                result.index = index - count + 1;
-                result.character = *(p_problem + result.index);
+            if (count >= (result.index_fin - result.index_init)) {
+                result.index_init = index - count + 1;
+                result.index_fin = result.index_init + count - 1;
             }
-
-            index++;
-        } else {
-            count = 1;
-            index++;
         }
+        else
+        {
+            count = 1;
+        }
+        index++;
     }
-
     return result;
 }
 
-Result final_result(const int p_subsize, const int num_solutions, char** sub_problems, Result* partial_solutions) {
-    Result solution = Result_default;
-    Result final_solution;
-    final_solution.index = p_subsize*num_solutions;
+Result final_result(const char* p_problem, const Result* p_solutions, const int p_num_solutions, int p_offset) {
 
-    for (int i = 0; i < num_solutions; i++) {
-        int anterior_index = 0;
-        int j = 0;
-        solution = *(partial_solutions + i);
-
-        if (*(*(sub_problems + i) + solution.index + solution.repetitions) == '\0') {
-            if ((i + 1) < num_solutions && j < p_subsize) {
-                while (*(*(sub_problems + i + 1) + j) == solution.character) {
-                    solution.repetitions++;
-                    j++;
-                }
-            }
+    Result solution = *p_solutions;
+    
+    for(int i = 1; i < p_num_solutions - 1; i++)
+    {
+        char last_character_previous_solution = *(p_problem + (p_solutions + i - 1)->index_fin + i*p_offset - 1);
+        char first_character_next_solution = *(p_problem + (p_solutions + i + 1)->index_fin + i*p_offset + 1);
+        
+        if(last_character_previous_solution == *(p_problem + (p_solutions + i)->index_fin + i*p_offset))
+        {
+            solution.index_init = (p_solutions + i - 1)->index_fin + i*p_offset - 1;
         }
-
-        j = p_subsize - 1;
-        if (solution.index == 0) {
-            if ((i - 1) > -1 && j > -1) {
-                while (*(*(sub_problems + i - 1) + j) == solution.character) {
-                    solution.repetitions++;
-                    anterior_index++;
-                    j--;
-                }
-            }
+        if((solution.index_fin - solution.index_init) < ((p_solutions + i)->index_fin - (p_solutions + i)->index_init))
+        {
+            solution = *(p_solutions + i);
         }
-
-        solution.index = solution.index + i * p_subsize - anterior_index;
-
-        if (solution.repetitions > final_solution.repetitions)
-            final_solution = solution;
+        if(first_character_next_solution == *(p_problem + (p_solutions + i)->index_fin + i*p_offset))
+        {
+            solution.index_init = (p_solutions + i + 1)->index_fin + i*p_offset + 1;
+        }
     }
-
-    return final_solution;
+    
+    return solution;
 }
 
 Result DC_recursive(const char* p_problem, const int p_subsize) {
     int subsize = (p_subsize < 1) ? 1 : p_subsize;
-    if (string_length(p_problem) <= subsize) {
-        return DC_iterative(p_problem, subsize);
-    } else {
-        int num_solutions;
-        char** sub_problems = (char**) malloc(sizeof (char*));
-        *sub_problems = (char *) NULL;
+    int length = string_length(p_problem);
 
-        problem_division(p_problem, subsize, sub_problems, &num_solutions);
-
-        Result partial_solutions[num_solutions];
-
-        for (int i = 0; i < num_solutions; i++) {
-            Result solution = DC_recursive(*(sub_problems + i), subsize);
-            partial_solutions[i] = solution;
+    if (length <= subsize)
+    {
+        return DC_iterative(p_problem, length);
+    }
+    else
+    {
+        int num_solutions = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
+        Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
+        
+        for(int i = 0; i < num_solutions; i++)
+        {
+            *(solutions + i) = DC_iterative((p_problem + i*subsize), i*subsize);
         }
-        Result result = final_result(subsize, num_solutions, sub_problems, partial_solutions);
-
-        for (int i = 0; i < num_solutions; i++) {
-            free(*(sub_problems + i));
-        }
-        free(sub_problems);
-
-        return result;
+        
+        return final_result(p_problem, solutions, num_solutions, subsize);
     }
 }

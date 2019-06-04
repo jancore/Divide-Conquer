@@ -11,22 +11,22 @@
  * Created on 21 de mayo de 2019, 18:13
  */
 #include "divide_and_conquer.h"
+#include <string.h>
 
 int main(int argc, char** argv)
 {
-    char opcion;
     int m = 5;
-    char C[] = "abceeeeksrzzzzyx";
+    char C[] = "abceeeeksrzzzyx";
     
     if (argc > 2)
     {
-        copy_string(C, argv[1]);
+        strcpy(C, argv[1]);
         m = atoi(argv[2]);
     }
 
     printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
     Result result = DC_recursive(C, m);
-    printf("Indice: %d, Repeticiones: %d, Caracter: \"%c\"\n", result.index, result.repetitions, result.character);
+    printf("Indice: %d, Repeticiones: %d\n", result.index_init, result.index_fin - result.index_init + 1);
     
     return 0;
 }
