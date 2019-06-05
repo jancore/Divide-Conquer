@@ -13,16 +13,15 @@ int string_length(const char* p_string) {
 
 Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
     Result result = {p_subsize*p_multiplier, p_subsize*p_multiplier};
-    int index = 1;
     int count = 1;
 
     p_limit = (p_limit < p_subsize) ? p_limit : p_subsize;
-    while (index < p_limit)
+    for (int index = 1; index < p_limit; index++)
     {
         if (*(p_problem + index - 1) == *(p_problem + index))
         {
             count++;
-            if (count >= (result.index_fin - result.index_init)) {
+            if (count > (result.index_fin - result.index_init + 1)) {
                 result.index_init = index - count + 1 + p_multiplier*p_subsize;
                 result.index_fin = result.index_init + count - 1;
             }
@@ -31,7 +30,6 @@ Result base_case(const char* p_problem, const int p_subsize, int p_limit, const 
         {
             count = 1;
         }
-        index++;
     }
     return result;
 }
@@ -107,5 +105,29 @@ Result DyV(const char* p_problem, const int p_subsize)
     Result result = final_result(p_problem, solutions, num_solutions, length);
     free(solutions);
     
+    return result;
+}
+
+Result DyV_iter(const char* p_problem, const int p_subsize)
+{
+    Result result = {0, 0};
+    int count = 1;
+    int length = string_length(p_problem);
+
+    for(int index = 1; index < length; index++)
+    {
+        if (*(p_problem + index - 1) == *(p_problem + index))
+        {
+            count++;
+            if (count > (result.index_fin - result.index_init + 1) && count <= p_subsize) {
+                result.index_init = index - count + 1;
+                result.index_fin = result.index_init + count - 1;
+            }
+        }
+        else
+        {
+            count = 1;
+        }
+    }
     return result;
 }

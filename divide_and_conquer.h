@@ -35,5 +35,7 @@ void recursive_case(Result* solutions, const char* p_problem, const int p_subsiz
 
 Result DyV(const char* p_problem, const int p_subsize);
 
+Result DyV_iter(const char* p_problem, const int p_subsize);
+
 #endif /* DIVIDE_AND_CONQUER_H */
 
