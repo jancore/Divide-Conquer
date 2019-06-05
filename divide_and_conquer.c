@@ -11,7 +11,7 @@ int string_length(const char* p_string) {
     return size;
 }
 
-Result DC_iterative(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
+Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
     Result result = {p_subsize*p_multiplier, p_subsize*p_multiplier};
     int index = 1;
     int count = 1;
@@ -23,7 +23,7 @@ Result DC_iterative(const char* p_problem, const int p_subsize, int p_limit, con
         {
             count++;
             if (count >= (result.index_fin - result.index_init)) {
-                result.index_init = index - count + 1 + p_multiplier*p_limit;
+                result.index_init = index - count + 1 + p_multiplier*p_subsize;
                 result.index_fin = result.index_init + count - 1;
             }
         }
@@ -36,27 +36,43 @@ Result DC_iterative(const char* p_problem, const int p_subsize, int p_limit, con
     return result;
 }
 
-Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int p_subsize) {
-
+Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int length) {
     Result solution = *p_solutions;
     
-    for(int i = 1; i < p_num_solutions - 1; i++)
+    for(int i = 0; i < p_num_solutions; i++)
     {
-        if((*(p_problem + (p_solutions + i - 1)->index_fin)) == (*(p_problem + (p_solutions + i)->index_init)))
-        {            
-            if(((p_solutions + i - 1)->index_fin) == ((p_solutions + i)->index_init - 1))
-            {
-                (p_solutions + i)->index_init = (p_solutions + i - 1)->index_init;
-            }
-        }
-        if((*(p_problem + (p_solutions + i + 1)->index_init)) == (*(p_problem + (p_solutions + i)->index_fin)))
+        int index_init = (p_solutions + i)->index_init - 1;
+        int index_fin = (p_solutions + i)->index_fin + 1;
+        
+        while(index_init > -1)
         {
-            if(((p_solutions + i + 1)->index_init) == ((p_solutions + i)->index_fin + 1))            
+            if(*(p_problem + index_init) == *(p_problem + (p_solutions + i)->index_init))
             {
-                (p_solutions + i)->index_fin = (p_solutions + i + 1)->index_fin;                
+                (p_solutions + i)->index_init--;
+                index_init--;
+            }
+            else
+            {
+                break;
             }
         }
         
+        while(index_fin < length)
+        {
+            if(*(p_problem + index_fin) == *(p_problem + (p_solutions + i)->index_fin))
+            {
+                (p_solutions + i)->index_fin++;
+                index_fin++;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    
+    for(int i = 1; i < p_num_solutions; i++)
+    {
         if((solution.index_fin - solution.index_init) < ((p_solutions + i)->index_fin - (p_solutions + i)->index_init))
         {
             solution = *(p_solutions + i);
@@ -66,17 +82,30 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
     return solution;
 }
 
-void DC_recursive(Result* solutions, const char* p_problem, const int p_subsize, const int p_index) {
+void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, const int p_index) {
     int subsize = (p_subsize < 1) ? 1 : p_subsize;
     int length = string_length(p_problem);
 
     if (length <= subsize)
     {
-        *(solutions + p_index) = DC_iterative(p_problem, subsize, length, p_index);
+        *(solutions + p_index) = base_case(p_problem, subsize, length, p_index);
     }
     else
     {
-        *(solutions + p_index) = DC_iterative(p_problem, subsize, subsize, p_index);        
-        DC_recursive(solutions, (p_problem + subsize), subsize, p_index + 1);
+        *(solutions + p_index) = base_case(p_problem, subsize, subsize, p_index);        
+        recursive_case(solutions, (p_problem + subsize), subsize, p_index + 1);
     }
+}
+
+Result DyV(const char* p_problem, const int p_subsize)
+{
+    int length = string_length(p_problem);
+    int num_solutions = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
+    Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
+    
+    recursive_case(solutions, p_problem, p_subsize, 0);
+    Result result = final_result(p_problem, solutions, num_solutions, length);
+    free(solutions);
+    
+    return result;
 }

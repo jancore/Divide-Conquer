@@ -27,12 +27,13 @@ typedef struct Result_s Result;
 
 int string_length(const char* p_string);
 
-Result DC_iterative(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier);
+Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier);
 
-Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int p_subsize);
+Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int length);
 
-void DC_recursive(Result* solutions, const char* p_problem, const int p_subsize, const int p_index);
+void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, const int p_index);
 
+Result DyV(const char* p_problem, const int p_subsize);
 
 #endif /* DIVIDE_AND_CONQUER_H */
 
