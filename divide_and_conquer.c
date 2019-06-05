@@ -53,7 +53,7 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
             }
             else
             {
-                index_init = -1;
+                break;
             }
         }
         
@@ -66,7 +66,7 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
             }
             else
             {
-                index_fin = length;
+                break;
             }
         }
     }
