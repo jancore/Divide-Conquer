@@ -15,7 +15,7 @@
 
 int main(int argc, char** argv)
 {
-    int m = 5;
+    int m = 6;
     char C[] = "abceeeeksrzzzyx";
     
     if (argc > 2)
@@ -25,8 +25,16 @@ int main(int argc, char** argv)
     }
 
     printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
-    Result result = DC_recursive(C, m);
+    
+    int length = string_length(C);
+    int num_solutions = (length % m == 0) ? length / m : length / m + 1;
+    Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
+    
+    DC_recursive(solutions, C, m, 0);
+    Result result = final_result(C, solutions, num_solutions, m);
+    
     printf("Indice: %d, Repeticiones: %d\n", result.index_init, result.index_fin - result.index_init + 1);
+    free(solutions);
     
     return 0;
 }

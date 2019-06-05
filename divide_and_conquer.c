@@ -11,18 +11,19 @@ int string_length(const char* p_string) {
     return size;
 }
 
-Result DC_iterative(const char* p_problem, const int p_limit) {
-    Result result = {0, 0};
+Result DC_iterative(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
+    Result result = {p_subsize*p_multiplier, p_subsize*p_multiplier};
     int index = 1;
     int count = 1;
 
+    p_limit = (p_limit < p_subsize) ? p_limit : p_subsize;
     while (index < p_limit)
     {
         if (*(p_problem + index - 1) == *(p_problem + index))
         {
             count++;
             if (count >= (result.index_fin - result.index_init)) {
-                result.index_init = index - count + 1;
+                result.index_init = index - count + 1 + p_multiplier*p_limit;
                 result.index_fin = result.index_init + count - 1;
             }
         }
@@ -35,50 +36,47 @@ Result DC_iterative(const char* p_problem, const int p_limit) {
     return result;
 }
 
-Result final_result(const char* p_problem, const Result* p_solutions, const int p_num_solutions, int p_offset) {
+Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int p_subsize) {
 
     Result solution = *p_solutions;
     
     for(int i = 1; i < p_num_solutions - 1; i++)
     {
-        char last_character_previous_solution = *(p_problem + (p_solutions + i - 1)->index_fin + i*p_offset - 1);
-        char first_character_next_solution = *(p_problem + (p_solutions + i + 1)->index_fin + i*p_offset + 1);
-        
-        if(last_character_previous_solution == *(p_problem + (p_solutions + i)->index_fin + i*p_offset))
-        {
-            solution.index_init = (p_solutions + i - 1)->index_fin + i*p_offset - 1;
+        if((*(p_problem + (p_solutions + i - 1)->index_fin)) == (*(p_problem + (p_solutions + i)->index_init)))
+        {            
+            if(((p_solutions + i - 1)->index_fin) == ((p_solutions + i)->index_init - 1))
+            {
+                (p_solutions + i)->index_init = (p_solutions + i - 1)->index_init;
+            }
         }
+        if((*(p_problem + (p_solutions + i + 1)->index_init)) == (*(p_problem + (p_solutions + i)->index_fin)))
+        {
+            if(((p_solutions + i + 1)->index_init) == ((p_solutions + i)->index_fin + 1))            
+            {
+                (p_solutions + i)->index_fin = (p_solutions + i + 1)->index_fin;                
+            }
+        }
+        
         if((solution.index_fin - solution.index_init) < ((p_solutions + i)->index_fin - (p_solutions + i)->index_init))
         {
             solution = *(p_solutions + i);
-        }
-        if(first_character_next_solution == *(p_problem + (p_solutions + i)->index_fin + i*p_offset))
-        {
-            solution.index_init = (p_solutions + i + 1)->index_fin + i*p_offset + 1;
         }
     }
     
     return solution;
 }
 
-Result DC_recursive(const char* p_problem, const int p_subsize) {
+void DC_recursive(Result* solutions, const char* p_problem, const int p_subsize, const int p_index) {
     int subsize = (p_subsize < 1) ? 1 : p_subsize;
     int length = string_length(p_problem);
 
     if (length <= subsize)
     {
-        return DC_iterative(p_problem, length);
+        *(solutions + p_index) = DC_iterative(p_problem, subsize, length, p_index);
     }
     else
     {
-        int num_solutions = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
-        Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
-        
-        for(int i = 0; i < num_solutions; i++)
-        {
-            *(solutions + i) = DC_iterative((p_problem + i*subsize), i*subsize);
-        }
-        
-        return final_result(p_problem, solutions, num_solutions, subsize);
+        *(solutions + p_index) = DC_iterative(p_problem, subsize, subsize, p_index);        
+        DC_recursive(solutions, (p_problem + subsize), subsize, p_index + 1);
     }
 }
