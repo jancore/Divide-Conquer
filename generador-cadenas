@@ -1,0 +1,29 @@
+#!/usr/bin/python3
+
+import random
+import sys
+
+if len(sys.argv) != 3:
+	print("Numero de parametros incorrecto")
+	print("USO: generador-cadenas.py [longitud cadena]>0 [numero cadenas]>0")
+	sys.exit()
+
+longitudCadena = int(sys.argv[1])
+numeroCadenas = int(sys.argv[2])
+
+if longitudCadena < 0 or numeroCadenas <0 :
+	print("Parametros incorrectos")
+	print("USO: generador-cadenas.py [longitud cadena]>0 [numero cadenas]>0")
+	sys.exit()
+
+listaLetras = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+
+for i in range(numeroCadenas):
+	cadenaCaracteres = ""
+
+	for j in range(longitudCadena):
+		cadenaCaracteres += random.choice(listaLetras)
+
+	print(cadenaCaracteres)
+
+

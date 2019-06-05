@@ -12,22 +12,35 @@
  */
 #include "divide_and_conquer.h"
 #include <string.h>
+#include <errno.h>
+#include<stdio.h>
+#include<stdlib.h>
 
 int main(int argc, char** argv)
 {
     int m = 5;
-    char C[] = "abceeeeksrzzzyx";
+    char* C;
     
-    if (argc > 2)
+    if (argc == 2)
     {
-        strcpy(C, argv[1]);
-        m = atoi(argv[2]);
+        m = atoi(argv[1]);
+    }
+    else
+    {
+        fprintf(stderr, "Wrong number of arguments\nUse: ./program <m>\n");
+        exit(EXIT_FAILURE);
     }
 
-    printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
-    Result result = DyV(C, m);    
-    printf("Indice: %d, Repeticiones: %d\n", result.index_init, result.index_fin - result.index_init + 1);
+    while(gets(C))
+    {
+        //printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
+        
+        Result result = DyV(C, m);    
+        printf("RECURSIVO -> Indice: %d, Repeticiones: %d\n", result.index_init, result.index_fin - result.index_init + 1);
+        result = DyV_iter(C, m);
+        printf("ITERATIVO -> Indice: %d, Repeticiones: %d\n\n", result.index_init, result.index_fin - result.index_init + 1);
+    }
     
-    return 0;
+    return 1;
 }
 
