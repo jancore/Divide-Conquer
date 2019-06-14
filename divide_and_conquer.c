@@ -1,5 +1,7 @@
 #include "divide_and_conquer.h"
 
+#include <math.h>
+
 int string_length(const char* p_string) {
     int size = 0;
 
@@ -9,6 +11,11 @@ int string_length(const char* p_string) {
     }
 
     return size;
+}
+
+int solution_size(const long p_multiplier, const int p_subsize, const int p_length)
+{
+    return (p_length/2 <= p_subsize) ? p_multiplier : solution_size(p_multiplier*2, p_subsize, p_length/2);
 }
 
 void copy_string(char* string_out, const char* string_in, const int p_index_init, const int p_index_fin)
@@ -22,8 +29,8 @@ void copy_string(char* string_out, const char* string_in, const int p_index_init
     *(string_out + i) = '\0';
 }
 
-Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier, const int p_is_odd) {
-    Result result = {p_subsize*p_multiplier, p_subsize*p_multiplier};
+Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
+    Result result = {p_multiplier, p_multiplier};
     int count = 1;
 
     p_limit = (p_limit < p_subsize) ? p_limit : p_subsize;
@@ -33,8 +40,8 @@ Result base_case(const char* p_problem, const int p_subsize, int p_limit, const 
         {
             count++;
             if (count > (result.index_fin - result.index_init + 1)) {
-                result.index_init = index - count + 1 + p_multiplier*p_limit;
-                result.index_fin = result.index_init + count - 1;
+                result.index_fin = index + p_multiplier;
+                result.index_init = result.index_fin - count + 1;
             }
         }
         else
@@ -91,41 +98,30 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
     return solution;
 }
 
-void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, const int p_index) {
-    int length = string_length(p_problem);
-    int is_odd = (length % 2 == 0) ? 0 : 1;
-    
-    char* problems[2];
-    problems[0] = (char*) malloc(p_subsize*sizeof(char));
-    problems[1] = (char*) malloc((length - p_subsize)*sizeof(char));
-    
-    copy_string(problems[0], p_problem, 0, p_subsize);
-    copy_string(problems[1], p_problem, p_subsize, length);    
-
-    for(int i = 0; i < 2; i++)
-    {        
-        int sub_length = string_length(problems[i]);
-        if (sub_length <= p_subsize)
-        {
-            *(solutions + p_index + i) = base_case(problems[i], p_subsize, sub_length, p_index + i, i*is_odd);
-        }
-        else
-        {
-            recursive_case(solutions, problems[i], p_subsize, p_index + 1);
-        }
+void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index) {
+    if ((p_index_fin + 1) > p_subsize)
+    {     
+        recursive_case(solutions, p_problem, p_subsize, p_pappend, p_index_fin/2, p_index);
+        recursive_case(solutions, (p_problem + p_index_fin/2 + 1), p_subsize, p_pappend, p_index_fin/2, p_index + p_index_fin/2 +1);
     }
-    free(problems[0]);
-    free(problems[1]);
+    else
+    {
+        *(solutions + *p_pappend) = base_case(p_problem, p_subsize, p_index_fin + 1, p_index);
+        *p_pappend = *p_pappend + 1;
+    }
 }
 
 Result DyV(const char* p_problem, const int p_subsize)
 {
-    int subsize = (p_subsize < 1) ? 1 : p_subsize;
+    double subsize = (p_subsize < 1) ? 1.0 : (double)p_subsize;
     int length = string_length(p_problem);
-    int num_solutions = (length % p_subsize == 0) ? length / p_subsize : length / p_subsize + 1;
+    double aaaa = log2(subsize);
+    double num_solutions = 5 - aaaa;
     Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
+    int append = 0;
+    int* pappend = &append;
     
-    recursive_case(solutions, p_problem, subsize, 0);
+    recursive_case(solutions, p_problem, subsize, pappend, length - 1, 0);
     Result result = final_result(p_problem, solutions, num_solutions, length);
     free(solutions);
     
@@ -142,6 +138,7 @@ Result DyV_iter(const char* p_problem, const int p_subsize)
     {
         if (*(p_problem + index - 1) == *(p_problem + index))
         {
+            count++;
             if (count > (result.index_fin - result.index_init + 1) && count <= p_subsize) {
                 result.index_init = index - count + 1;
                 result.index_fin = result.index_init + count - 1;
