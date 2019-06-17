@@ -35,7 +35,7 @@ Result base_case(const char* p_problem, const int p_subsize, int p_limit, const 
 
 Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int length);
 
-void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index);
+void recursive_case(Result* solutions, int* p_num_solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index);
 
 Result DyV(const char* p_problem, const int p_subsize);
 

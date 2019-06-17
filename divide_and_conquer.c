@@ -98,11 +98,13 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
     return solution;
 }
 
-void recursive_case(Result* solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index) {
+void recursive_case(Result* solutions, int* p_num_solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index) {
     if ((p_index_fin + 1) > p_subsize)
     {     
-        recursive_case(solutions, p_problem, p_subsize, p_pappend, p_index_fin/2, p_index);
-        recursive_case(solutions, (p_problem + p_index_fin/2 + 1), p_subsize, p_pappend, p_index_fin/2, p_index + p_index_fin/2 +1);
+        *p_num_solutions = *p_num_solutions + 1;
+        solutions = (Result*) realloc(solutions, (*p_num_solutions)*sizeof(Result));
+        recursive_case(solutions, p_num_solutions, p_problem, p_subsize, p_pappend, p_index_fin/2, p_index);
+        recursive_case(solutions, p_num_solutions, (p_problem + p_index_fin/2 + 1), p_subsize, p_pappend, p_index_fin/2, p_index + p_index_fin/2 +1);
     }
     else
     {
@@ -115,13 +117,12 @@ Result DyV(const char* p_problem, const int p_subsize)
 {
     double subsize = (p_subsize < 1) ? 1.0 : (double)p_subsize;
     int length = string_length(p_problem);
-    double aaaa = log2(subsize);
-    double num_solutions = 5 - aaaa;
-    Result* solutions = (Result*) malloc(num_solutions*sizeof(Result));
+    Result* solutions = (Result*) malloc(sizeof(Result));
+    int num_solutions = 1;
     int append = 0;
     int* pappend = &append;
     
-    recursive_case(solutions, p_problem, subsize, pappend, length - 1, 0);
+    recursive_case(solutions, &num_solutions, p_problem, subsize, pappend, length - 1, 0);
     Result result = final_result(p_problem, solutions, num_solutions, length);
     free(solutions);
     
