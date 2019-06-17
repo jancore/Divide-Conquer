@@ -20,7 +20,7 @@
 struct Result_s
 {
     int index_init;
-    int index_fin;
+    int repetitions;
 };
 
 typedef struct Result_s Result;
@@ -33,7 +33,7 @@ void copy_string(char* string_out, const char* string_in, const int p_index_init
 
 Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier);
 
-Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int length);
+Result final_result(const char* p_problem, const int p_subsize, Result* p_solutions, const int p_num_solutions, int length);
 
 void recursive_case(Result* solutions, int* p_num_solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_index_fin, int p_index);
 

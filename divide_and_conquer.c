@@ -30,58 +30,42 @@ void copy_string(char* string_out, const char* string_in, const int p_index_init
 }
 
 Result base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_multiplier) {
-    Result result = {p_multiplier, p_multiplier};
-    int count = 1;
+    Result result = {p_multiplier, 1};
 
     p_limit = (p_limit < p_subsize) ? p_limit : p_subsize;
-    for (int index = 1; index < p_limit; index++)
+    for (int index = 0; index < p_subsize; index++)
     {
-        if (*(p_problem + index - 1) == *(p_problem + index))
+        int count = 1;
+        for(int j = 1; j < p_limit; j++)
         {
-            count++;
-            if (count > (result.index_fin - result.index_init + 1)) {
-                result.index_fin = index + p_multiplier;
-                result.index_init = result.index_fin - count + 1;
+            if (*(p_problem + index) == *(p_problem + index + j))
+            {
+                count++;
+                if (count > result.repetitions) {
+                    result.repetitions = count;
+                    result.index_init = index + p_multiplier;
+                }
             }
-        }
-        else
-        {
-            count = 1;
         }
     }
     return result;
 }
 
-Result final_result(const char* p_problem, Result* p_solutions, const int p_num_solutions, int length) {
+Result final_result(const char* p_problem, const int p_subsize, Result* p_solutions, const int p_num_solutions, int length) {
     for(int i = 0; i < p_num_solutions; i++)
     {
-        int index_init = (p_solutions + i)->index_init - 1;
-        int index_fin = (p_solutions + i)->index_fin + 1;
+        int index_solution_i = (p_solutions + i)->index_init;
+        int repetitions_solution_i = (p_solutions + i)->repetitions;
+        int index_init = index_solution_i - 1;
         
-        while(index_init > -1)
+        while(index_init > -1 && (index_solution_i - index_init) < p_subsize)
         {
-            if(*(p_problem + index_init) == *(p_problem + (p_solutions + i)->index_init))
+            if(*(p_problem + index_init) == *(p_problem + index_solution_i))
             {
-                (p_solutions + i)->index_init--;
-                index_init--;
+                (p_solutions + i)->index_init =  index_init;
+                (p_solutions + i)->repetitions++;
             }
-            else
-            {
-                index_init = -1;
-            }
-        }
-        
-        while(index_fin < length)
-        {
-            if(*(p_problem + index_fin) == *(p_problem + (p_solutions + i)->index_fin))
-            {
-                (p_solutions + i)->index_fin++;
-                index_fin++;
-            }
-            else
-            {
-                index_fin = length;
-            }
+            index_init--;
         }
     }
     
@@ -89,7 +73,7 @@ Result final_result(const char* p_problem, Result* p_solutions, const int p_num_
     
     for(int i = 1; i < p_num_solutions; i++)
     {
-        if((solution.index_fin - solution.index_init) < ((p_solutions + i)->index_fin - (p_solutions + i)->index_init))
+        if(solution.repetitions < (p_solutions + i)->repetitions)
         {
             solution = *(p_solutions + i);
         }
@@ -103,6 +87,7 @@ void recursive_case(Result* solutions, int* p_num_solutions, const char* p_probl
     {     
         *p_num_solutions = *p_num_solutions + 1;
         solutions = (Result*) realloc(solutions, (*p_num_solutions)*sizeof(Result));
+        
         recursive_case(solutions, p_num_solutions, p_problem, p_subsize, p_pappend, p_index_fin/2, p_index);
         recursive_case(solutions, p_num_solutions, (p_problem + p_index_fin/2 + 1), p_subsize, p_pappend, p_index_fin/2, p_index + p_index_fin/2 +1);
     }
@@ -123,7 +108,7 @@ Result DyV(const char* p_problem, const int p_subsize)
     int* pappend = &append;
     
     recursive_case(solutions, &num_solutions, p_problem, subsize, pappend, length - 1, 0);
-    Result result = final_result(p_problem, solutions, num_solutions, length);
+    Result result = final_result(p_problem, subsize, solutions, num_solutions, length);
     free(solutions);
     
     return result;
@@ -132,22 +117,22 @@ Result DyV(const char* p_problem, const int p_subsize)
 Result DyV_iter(const char* p_problem, const int p_subsize)
 {
     Result result = {0, 0};
-    int count = 1;
     int length = string_length(p_problem);
 
-    for(int index = 1; index < length; index++)
+    for(int index = 0; index < length - p_subsize; index++)
     {
-        if (*(p_problem + index - 1) == *(p_problem + index))
+        int count = 1;
+        for(int j = 1; j < p_subsize; j++)
         {
-            count++;
-            if (count > (result.index_fin - result.index_init + 1) && count <= p_subsize) {
-                result.index_init = index - count + 1;
-                result.index_fin = result.index_init + count - 1;
+            if (*(p_problem + index) == *(p_problem + index + j))
+            {
+                count++;
+                if (count > result.repetitions)
+                {
+                    result.index_init = index;
+                    result.repetitions = count;
+                }
             }
-        }
-        else
-        {
-            count = 1;
         }
     }
     return result;
