@@ -13,13 +13,11 @@
 #include "divide_and_conquer.h"
 #include <string.h>
 #include <errno.h>
-#include<stdio.h>
-#include<stdlib.h>
 
 int main(int argc, char** argv)
 {
     int m = 5;
-    char* C;
+    char* C = (char*) malloc(1000*sizeof(char));
     
     if (argc == 2)
     {
@@ -36,9 +34,9 @@ int main(int argc, char** argv)
         //printf("Cadena: \"%s\", Longitud subcadena: %d\n", C, m);
         
         Result result = DyV(C, m);    
-        printf("RECURSIVO -> Indice: %d, Repeticiones: %d\n", result.index_init, result.index_fin - result.index_init + 1);
+        printf("RECURSIVO -> Indice: %d, Repeticiones: %d\n", result.index_init, result.repetitions);
         result = DyV_iter(C, m);
-        printf("ITERATIVO -> Indice: %d, Repeticiones: %d\n\n", result.index_init, result.index_fin - result.index_init + 1);
+        printf("ITERATIVO -> Indice: %d, Repeticiones: %d\n\n", result.index_init, result.repetitions);
     }
     
     return 1;
