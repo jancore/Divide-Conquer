@@ -30,7 +30,7 @@ int string_length(const char* p_string);
 
 void base_case(const char* p_problem, const int p_subsize, int p_limit, const int p_offset, Result* p_solution);
 
-Result final_result(const char* p_problem, const int p_subsize, Result** p_solutions, const int p_num_solutions);
+Result final_result(const char* p_problem, const int p_subsize, Result** p_solutions, const int p_num_solutions, const int p_length);
 
 void recursive_case(Result** solutions, int* p_num_solutions, const char* p_problem, const int p_subsize, int* p_pappend, const int p_length, int p_index);
 

@@ -31,7 +31,7 @@ void base_case(const char* p_problem, const int p_subsize, int p_limit, const in
     }
 }
 
-Result final_result(const char* p_problem, const int p_subsize, Result** p_solutions, const int p_num_solutions) {
+Result final_result(const char* p_problem, const int p_subsize, Result** p_solutions, const int p_num_solutions, const int p_length) {
     for(int i = 0; i < p_num_solutions; i++)
     {
         for(int j = 0; j < p_subsize; j++)
@@ -39,7 +39,7 @@ Result final_result(const char* p_problem, const int p_subsize, Result** p_solut
             int index_solution_i = (*(p_solutions + i) + j)->index_init;
             int index_init = index_solution_i - 1;
             
-            while(index_init > -1 && (index_solution_i - index_init) < p_subsize)
+            while(index_init < p_length && index_init > -1 && (index_solution_i - index_init) < p_subsize)
             {
                 if(*(p_problem + index_init) == *(p_problem + index_solution_i))
                 {
@@ -66,7 +66,7 @@ Result final_result(const char* p_problem, const int p_subsize, Result** p_solut
     {
         for(int j = 0; j < p_subsize; j++)
         {
-            if(solution.repetitions < (*(p_solutions + i) + j)->repetitions && (*(p_solutions + i) + j)->repetitions <= p_subsize)
+            if(solution.repetitions < (*(p_solutions + i) + j)->repetitions)
             {
                 solution = *(*(p_solutions + i) + j);
             }    
@@ -115,7 +115,7 @@ Result DyV(const char* p_problem, const int p_subsize)
     }
     
     recursive_case(solutions, &num_solutions, p_problem, subsize, pappend, length, 0);
-    Result result = final_result(p_problem, subsize, solutions, num_solutions);
+    Result result = final_result(p_problem, subsize, solutions, num_solutions, length);
     
     for(int i = 0; i < num_solutions; i++)
     {
