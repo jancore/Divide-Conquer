@@ -32,6 +32,8 @@ void base_case(const char* p_problem, const int p_subsize, int p_limit, const in
 }
 
 Result final_result(const char* p_problem, const int p_subsize, Result** p_solutions, const int p_num_solutions, const int p_length) {
+    Result solution = *(*(p_solutions));
+    
     for(int i = 0; i < p_num_solutions; i++)
     {
         for(int j = 0; j < p_subsize; j++)
@@ -57,15 +59,7 @@ Result final_result(const char* p_problem, const int p_subsize, Result** p_solut
                 }
                 index_init--;
             }
-        }
-    }
-    
-    Result solution = *(*(p_solutions));
-    
-    for(int i = 0; i < p_num_solutions; i++)
-    {
-        for(int j = 0; j < p_subsize; j++)
-        {
+            
             if(solution.repetitions < (*(p_solutions + i) + j)->repetitions)
             {
                 solution = *(*(p_solutions + i) + j);
@@ -128,7 +122,7 @@ Result DyV(const char* p_problem, const int p_subsize)
 
 Result DyV_iter(const char* p_problem, const int p_subsize)
 {
-    Result result = {0, 0};
+    Result result = {0, 0, 1};
     int length = string_length(p_problem);
 
     for(int index = 0; index < length - p_subsize; index++)
