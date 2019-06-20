@@ -70,7 +70,7 @@ Result final_result(const char* p_problem, const int p_subsize, Result** p_solut
             }
         }
     }
-    
+    solution.index_init = solution.index_init - (p_subsize - (solution.index_fin - solution.index_init + 1));
     return solution;
 }
 
@@ -136,10 +136,12 @@ Result DyV_iter(const char* p_problem, const int p_subsize)
                 if (count > result.repetitions)
                 {
                     result.index_init = index;
+                    result.index_fin = index + j;
                     result.repetitions = count;
                 }
             }
         }
     }
+    result.index_init = result.index_init - (p_subsize - (result.index_fin - result.index_init + 1));
     return result;
 }
